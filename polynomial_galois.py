@@ -184,6 +184,7 @@ class Polynomial(object):
         return self._elements_to_polynomial(elements)
 
 
+#FIXME poor design
 class PolynomialOnRing(Polynomial):
     def __init__(self, elements):
         self.polynomial = Polynomial(elements) #% order_polynomial
