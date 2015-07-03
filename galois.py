@@ -1,6 +1,6 @@
 
-order = 0
-order_polynomial = None
+modulus = 0
+modulus_polynomial = None
 
 
 class Element(object):
@@ -10,33 +10,33 @@ class Element(object):
         element: The actual value of an element of a polynomial, given in int.
         """
 
-        assert(order != 0)
-        self.element = element % order
+        assert(modulus != 0)
+        self.element = element % modulus
 
     def __str__(self):
         return str(self.element)
 
     def __add__(self, other):
-        e = (self.element + other.element) % order
+        e = (self.element + other.element) % modulus
         return Element(e)
 
     def __mul__(self, other):
-        e = (self.element * other.element) % order
+        e = (self.element * other.element) % modulus
         return Element(e)
 
     def __sub__(self, other):
         c = other.complement()
-        e = (self.element + c.element) % order
+        e = (self.element + c.element) % modulus
         return Element(e)
 
     def __truediv__(self, other):
-        for e in range(order):
-            if((e * other.element) % order == self.element):
+        for e in range(modulus):
+            if((e * other.element) % modulus == self.element):
                 return Element(e)
         return None
 
     def complement(self):
-        return Element(order-self.element)
+        return Element(modulus-self.element)
 
 
 class Polynomial(object):
@@ -47,7 +47,7 @@ class Polynomial(object):
                   e.g "201" means 2*x^2+1
         """
 
-        assert(order != 0)
+        assert(modulus != 0)
         elements = map(int, elements)
         self.elements = [Element(e) for e in elements]
 
@@ -184,23 +184,31 @@ class Polynomial(object):
         return self._elements_to_polynomial(elements)
 
 
-#FIXME poor design
 class PolynomialOnRing(Polynomial):
     def __init__(self, elements):
-        self.polynomial = Polynomial(elements) #% order_polynomial
-        self.elements = self.polynomial.elements
+        super(PolynomialOnRing, self).__init__(elements)
 
     def __add__(self, polynomial):
-        return (self.polynomial + polynomial) % order_polynomial
+        p = super(PolynomialOnRing, self).__add__(polynomial)
+        p = p % modulus_polynomial
+        return PolynomialOnRing(str(p))
 
     def __sub__(self, polynomial):
-        return (self.polynomial - polynomial) % order_polynomial
+        p = super(PolynomialOnRing, self).__sub__(polynomial)
+        p = p % modulus_polynomial
+        return PolynomialOnRing(str(p))
 
     def __mul__(self, polynomial):
-        return (self.polynomial * polynomial) % order_polynomial
+        p = super(PolynomialOnRing, self).__mul__(polynomial)
+        p = p % modulus_polynomial
+        return PolynomialOnRing(str(p))
 
     def __truediv__(self, polynomial):
-        return (self.polynomial / polynomial) % order_polynomial
+        p = super(PolynomialOnRing, self).__truediv__(polynomial)
+        p = p % modulus_polynomial
+        return PolynomialOnRing(str(p))
 
     def __mod__(self, polynomial):
-        return (self.polynomial % polynomial) % order_polynomial
+        p = super(PolynomialOnRing, self).__mod__(polynomial)
+        p = p % modulus_polynomial
+        return PolynomialOnRing(str(p))

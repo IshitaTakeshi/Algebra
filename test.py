@@ -1,10 +1,10 @@
 import unittest
 
-import polynomial_galois
-from polynomial_galois import Element, Polynomial, PolynomialOnRing
+import galois
+from galois import Element, Polynomial, PolynomialOnRing
 
-polynomial_galois.order = 3
-polynomial_galois.order_polynomial = Polynomial('102')
+galois.modulus = 3
+galois.modulus_polynomial = Polynomial('102')
 
 
 class TestElement(unittest.TestCase):
