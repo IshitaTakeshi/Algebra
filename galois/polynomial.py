@@ -2,6 +2,15 @@
 modulus = 0
 modulus_polynomial = None
 
+def set_modulus(modulus_, polynomial):
+    """
+    modulus_ : int
+    polynomial : list
+    """
+    global modulus, modulus_polynomial
+    modulus = modulus_
+    modulus_polynomial = Polynomial(polynomial)
+
 
 class Element(object):
     def __init__(self, element):
@@ -12,6 +21,9 @@ class Element(object):
 
         assert(modulus != 0)
         self.element = element % modulus
+
+    def __eq__(self, other):
+        return self.element == other.element
 
     def __str__(self):
         return str(self.element)
@@ -48,9 +60,7 @@ class Polynomial(object):
         """
 
         assert(modulus != 0)
-        elements = map(int, elements)
         self.elements = [Element(e) for e in elements]
-
         self.elements = self._remove_trailing_zeros(self.elements)
 
     def _remove_trailing_zeros(self, elements):
@@ -59,17 +69,19 @@ class Polynomial(object):
         polynomial: list
         """
         """Remove trailing zeros. e.g., '000212' to '212'"""
+
+        zero = Element(0)
         n = 0
         for i, e in enumerate(elements):
             if(i == len(elements)-1):
                 return [elements[-1]]
-            if(str(e) != '0'):
+            if(e != zero):
                 n = i
                 break
         return elements[n:]
 
     def __str__(self):
-        return ''.join(map(str, self.elements))
+        return ' '.join(map(str, self.elements))
 
     def __setitem__(self, key, item):
         self.elements[key] = item
@@ -88,8 +100,15 @@ class Polynomial(object):
     def __getitem__(self, key):
         return self.elements[key]
 
+    def tolist(self):
+        elements = map(str, self.elements)
+        elements = list(map(int, elements))
+        return elements
+
     def _elements_to_polynomial(self, elements):
-        return Polynomial(''.join(map(str, elements)))
+        elements = map(str, elements)
+        elements = list(map(int, elements))
+        return Polynomial(elements)
 
     def __add__(self, polynomial):
         if(len(self) < len(polynomial)):
@@ -139,7 +158,7 @@ class Polynomial(object):
         """Returns: quotient and remainder"""
 
         if(len(polynomial2) > len(polynomial1)):
-            return Polynomial('0'), self
+            return Polynomial([0]), self
 
         s = len(polynomial2)
 
@@ -167,11 +186,11 @@ class Polynomial(object):
 
     def __eq__(self, polynomial):
         a = isinstance(self, Polynomial) and isinstance(polynomial, Polynomial)
-        b = str(self) == str(polynomial)
+        b = self.tolist() == polynomial.tolist()
         return a and b
 
     def __mod__(self, polynomial):
-        if(polynomial == Polynomial('0')):
+        if(polynomial == Polynomial([0])):
             raise ZeroDivisionError
 
         quotient, remainder = self._divide_with_remainder(self, polynomial)
@@ -191,24 +210,24 @@ class PolynomialOnRing(Polynomial):
     def __add__(self, polynomial):
         p = super(PolynomialOnRing, self).__add__(polynomial)
         p = p % modulus_polynomial
-        return PolynomialOnRing(str(p))
+        return PolynomialOnRing(p.tolist())
 
     def __sub__(self, polynomial):
         p = super(PolynomialOnRing, self).__sub__(polynomial)
         p = p % modulus_polynomial
-        return PolynomialOnRing(str(p))
+        return PolynomialOnRing(p.tolist())
 
     def __mul__(self, polynomial):
         p = super(PolynomialOnRing, self).__mul__(polynomial)
         p = p % modulus_polynomial
-        return PolynomialOnRing(str(p))
+        return PolynomialOnRing(p.tolist())
 
     def __truediv__(self, polynomial):
         p = super(PolynomialOnRing, self).__truediv__(polynomial)
         p = p % modulus_polynomial
-        return PolynomialOnRing(str(p))
+        return PolynomialOnRing(p.tolist())
 
     def __mod__(self, polynomial):
         p = super(PolynomialOnRing, self).__mod__(polynomial)
         p = p % modulus_polynomial
-        return PolynomialOnRing(str(p))
+        return PolynomialOnRing(p.tolist())
