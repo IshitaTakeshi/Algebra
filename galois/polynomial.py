@@ -2,6 +2,7 @@
 modulus = 0
 modulus_polynomial = None
 
+
 def set_modulus(modulus_, polynomial):
     """
     modulus_ : int
@@ -35,6 +36,16 @@ class Element(object):
     def __mul__(self, other):
         e = (self.element * other.element) % modulus
         return Element(e)
+
+    def __pow__(self, n):
+        assert(n >= 0)
+        if(n == 0):
+            return Element(1)
+
+        e = Element(1)
+        for i in range(n):
+            e *= self
+        return e
 
     def __sub__(self, other):
         c = other.complement()
@@ -89,6 +100,16 @@ class Polynomial(object):
     def _add_elementwise(self, polynomial1, polynomial2):
         assert(len(polynomial1) == len(polynomial2))
         return [e1+e2 for e1, e2 in zip(polynomial1, polynomial2)]
+
+    def __pow__(self, n):
+        assert(n >= 0)
+        if(n == 0):
+            return Polynomial([1])
+
+        p = Polynomial([1])
+        for i in range(n):
+            p *= self
+        return p
 
     def __len__(self):
         """Returns the degree of polynomial"""
@@ -219,6 +240,11 @@ class PolynomialOnRing(Polynomial):
 
     def __mul__(self, polynomial):
         p = super(PolynomialOnRing, self).__mul__(polynomial)
+        p = p % modulus_polynomial
+        return PolynomialOnRing(p.tolist())
+
+    def __pow__(self, n):
+        p = super(PolynomialOnRing, self).__pow__(n)
         p = p % modulus_polynomial
         return PolynomialOnRing(p.tolist())
 

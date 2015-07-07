@@ -41,6 +41,11 @@ class TestElement(unittest.TestCase):
         c = a*b
         self.assertEqual(c.element, 0)
 
+    def test_pow(self):
+        c = Element(2)
+        c = pow(c, 3)
+        self.assertEqual(c.element, 2)
+
     def test_sub(self):
         a = Element(1)
         b = Element(2)
@@ -147,6 +152,15 @@ class TestPolynomial(unittest.TestCase):
         c = a * b
         self.assertEqual(c.tolist(), [2, 0, 0, 1, 0])
 
+    def test_pow(self):
+        c = Polynomial([2, 0, 1])
+        c = pow(c, 0)
+        self.assertEqual(c.tolist(), [1])
+
+        c = Polynomial([2, 0, 1])
+        c = pow(c, 3)
+        self.assertEqual(c.tolist(), [2, 0, 0, 0, 0, 0, 1])
+
     def test_div(self):
         a = Polynomial([1, 1])
         b = Polynomial([2, 2])
@@ -232,6 +246,15 @@ class TestPolynomialOnRing(unittest.TestCase):
         a = PolynomialOnRing([2, 1, 0])
         b = PolynomialOnRing([1, 1, 1])
         c = a * b
+        self.assertEqual(c.tolist(), [1, 2])
+
+    def test_pow(self):
+        c = PolynomialOnRing([1, 0, 2])
+        c = pow(c, 3)
+        self.assertEqual(c.tolist(), [0])
+
+        c = PolynomialOnRing([1, 2])
+        c = pow(c, 3)
         self.assertEqual(c.tolist(), [1, 2])
 
     def test_div(self):
