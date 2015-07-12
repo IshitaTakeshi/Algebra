@@ -1,6 +1,8 @@
+from util import decimal_to_base_n
+
 
 modulus = 0
-modulus_polynomial = None
+modulu_polynomial = None
 
 
 def set_modulus(modulus_, polynomial):
@@ -20,6 +22,7 @@ class Element(object):
         element: The actual value of an element of a polynomial, given in int.
         """
 
+        assert(isinstance(element, int))
         assert(modulus != 0)
         self.element = element % modulus
 
@@ -70,6 +73,9 @@ class Polynomial(object):
                   e.g "201" means 2*x^2+1
         """
 
+        if not(isinstance(elements, list)):
+            raise TypeError("Elements must be given as list")
+
         assert(modulus != 0)
         self.elements = [Element(e) for e in elements]
         self.elements = self._remove_trailing_zeros(self.elements)
@@ -102,7 +108,12 @@ class Polynomial(object):
         return [e1+e2 for e1, e2 in zip(polynomial1, polynomial2)]
 
     def __pow__(self, n):
+        """
+        pow(Polynomial([0]), 0) is defined as Polynomial([0])
+        """
+
         assert(n >= 0)
+
         if(n == 0):
             return Polynomial([1])
 
@@ -257,3 +268,49 @@ class PolynomialOnRing(Polynomial):
         p = super(PolynomialOnRing, self).__mod__(polynomial)
         p = p % modulus_polynomial
         return PolynomialOnRing(p.tolist())
+
+
+def is_primitive_root(polynomial):
+    one = PolynomialOnRing([1])
+    k = pow(modulus, len(polynomial)) - 1
+    p = pow(polynomial, k)
+    return p == one
+
+
+def find_primitive_roots(degree):
+    roots = []
+    n = pow(modulus, degree)
+    for i in range(2, n):
+        e = decimal_to_base_n(i, modulus)
+        p = PolynomialOnRing(e)
+        if(is_primitive_root(p)):
+            roots.append(p)
+    return roots
+
+
+def find_minimal_polynomial(polynomial):
+    zero = PolynomialOnRing([0])
+    i = 1
+
+    while True:
+        minimal_polynomial = decimal_to_base_n(i, modulus)
+
+        p = PolynomialOnRing([0])
+        for degree, coefficient in enumerate(reversed(minimal_polynomial)):
+            c = PolynomialOnRing([coefficient])
+            p += c * pow(polynomial, degree)
+
+        if(p == zero):
+            return PolynomialOnRing(minimal_polynomial)
+
+        i += 1
+
+
+def find_primitive_polynomials(degree):
+    roots = find_primitive_roots(degree)
+    primitive_polynomials = []
+    for root in roots:
+        p = find_minimal_polynomial(root)
+        primitive_polynomials.append(p)
+        print("root: {!s:>5}  p: {!s:>5}".format(root, p))
+    return primitive_polynomials
